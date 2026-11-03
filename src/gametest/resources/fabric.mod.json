@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "oreandorder_test",
+  "version": "1.0.0",
+  "name": "Ore & Order server tests",
+  "environment": "*",
+  "entrypoints": { "fabric-gametest": ["dev.oreandorder.WorkerGameTests"] }
+}

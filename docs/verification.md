@@ -1,5 +1,13 @@
 # Verification — 2026-11-03
 
+## Worker milestone (0.2.0)
+
+`build runGameTest` passed with the toolchain below: 77 planner/HTTP checks and all 8 required Minecraft server tests (7 worker tests plus Fabric's registration test). Worker tests exercise real navigation, mining two ore blocks, loot pickup, tool wear and chest delivery; full-storage retention; cancellation; unsuitable tools and area limits; inaccessible ore; entity/binding serialization; and item-transfer conservation. The command parser is checked with a namespaced item ID.
+
+The world-start ordering and exact standing-cell navigation are exercised by these tests. Minecraft server tests do not verify the client renderer visually or mouse targeting in a live client. Those remain manual in-game checks. This milestone does not change the provider HTTP client or require a new live NVIDIA request.
+
+## Initial command milestone (0.1.0)
+
 Target: Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.163.0+26.3, Loom 1.17.21, Gradle 9.6.0, JDK 25.
 
 - `build`: passed, producing the mod JAR and source JAR.

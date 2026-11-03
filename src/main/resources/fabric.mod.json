@@ -3,9 +3,9 @@
   "id": "oreandorder",
   "version": "${version}",
   "name": "Ore & Order",
-  "description": "Translate natural-language worker orders into validated plans. Command-pipeline prototype.",
+  "description": "Command a worker to mine exposed ore and deliver its drops to your storage.",
   "environment": "*",
-  "entrypoints": { "main": ["dev.oreandorder.OreAndOrder"] },
+  "entrypoints": { "main": ["dev.oreandorder.OreAndOrder"], "client": ["dev.oreandorder.OreAndOrderClient"] },
   "depends": {
     "fabricloader": ">=0.19.5",
     "minecraft": "~26.3",
