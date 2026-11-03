@@ -4,5 +4,8 @@
   "version": "1.0.0",
   "name": "Ore & Order server tests",
   "environment": "*",
-  "entrypoints": { "fabric-gametest": ["dev.oreandorder.WorkerGameTests"] }
+  "entrypoints": {
+    "fabric-gametest": ["dev.oreandorder.WorkerGameTests", "dev.oreandorder.VillagerMenuGameTests"],
+    "fabric-client-gametest": ["dev.oreandorder.VillagerMenuClientTest"]
+  }
 }

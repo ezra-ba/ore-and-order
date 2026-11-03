@@ -1,5 +1,14 @@
 # Verification — 2026-11-03
 
+## Villager interaction milestone (0.3.0)
+
+- Build passed with 77 planner/HTTP integration checks and all 10 required Minecraft server tests.
+- New server tests verify recruitment preserves the name, equipment and exact item count; enables worker movement; enforces the one-worker limit; restricts control to the owner with operator permissions; hides other players' inventory; and checks action packet encoding and input bounds.
+- `runClientGameTest` passed in Minecraft 26.3. It captured and exercised Actions, Setup, Inventory and ordinary-villager panels, checked widget bounds, then performed a real right-click, recruited the villager through the menu and equipped the held pickaxe through a button. Screenshots were visually inspected.
+- The client inventory view resolves item holders from the connected world's registry. The click test uses Minecraft's SDL right-button constant. Client assets were populated from matching installed objects plus the remaining official asset downloads.
+
+The client test uses a disposable world and does not invoke NVIDIA. Block-selection HUD placement/cancellation, normal merchant trading and pending-AI-order cancellation are not exercised by the current client test and remain manual verification steps; their server-side operations reuse the existing controller and command paths. The earlier live NVIDIA check below remains the evidence for the unchanged provider client.
+
 ## Worker milestone (0.2.0)
 
 `build runGameTest` passed with the toolchain below: 77 planner/HTTP checks and all 8 required Minecraft server tests (7 worker tests plus Fabric's registration test). Worker tests exercise real navigation, mining two ore blocks, loot pickup, tool wear and chest delivery; full-storage retention; cancellation; unsuitable tools and area limits; inaccessible ore; entity/binding serialization; and item-transfer conservation. The command parser is checked with a namespaced item ID.
