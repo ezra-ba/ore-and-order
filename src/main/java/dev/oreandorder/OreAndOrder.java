@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.CompletionException;
 
 public final class OreAndOrder implements ModInitializer {
+    public static OreAndOrder instance;
     private PlannerClient planner;
     public static WorkerController workers;
     private final Map<UUID, Job> jobs = new HashMap<>();
@@ -25,7 +26,9 @@ public final class OreAndOrder implements ModInitializer {
     private record Job(UUID id, String status) {}
 
     @Override public void onInitialize() {
+        instance=this;
         WorkerTypes.initialize();
+        VillagerMenus.initialize();
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             try { planner = new PlannerClient(PlannerConfig.load(FabricLoader.getInstance().getConfigDir().resolve("ore-and-order.properties"))); }
             catch (Exception e) {
@@ -36,10 +39,11 @@ public final class OreAndOrder implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             if (workers != null) workers.stop();
             workers = null;
+            VillagerMenus.clear();
             if (planner != null) planner.close();
             planner = null; jobs.clear(); lastOrders.clear();
         });
-        ServerTickEvents.END_SERVER_TICK.register(server -> { if (workers != null) workers.tick(); });
+        ServerTickEvents.END_SERVER_TICK.register(server -> { if (workers != null) { workers.tick(); VillagerMenus.tick(server); } });
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damage) -> {
             if (entity instanceof WorkerEntity worker && workers != null) workers.died(worker);
         });
@@ -57,11 +61,26 @@ public final class OreAndOrder implements ModInitializer {
                 }))
                 .then(Commands.literal("cancel").executes(ctx -> {
                     UUID player = ctx.getSource().getPlayerOrException().getUUID();
-                    jobs.put(player, new Job(UUID.randomUUID(), "Cancelled."));
-                    workers.cancel(player);
+                    cancelOrder(player);
                     return say(ctx.getSource(), "Cancelled. Any late model response will be ignored.");
                 }))
         ));
+    }
+
+    public boolean planning(UUID owner) { Job job=jobs.get(owner); return job!=null && job.status().equals("Planning…"); }
+    public String activityForMenu(UUID owner) {
+        Job job=jobs.get(owner);
+        if(planning(owner)) return "Planning your order…";
+        if(!workers.busy(owner) && job!=null && job.status().startsWith("Failed:")) return job.status();
+        return workers.activity(owner);
+    }
+    public void clearPlanHistory(UUID owner) { jobs.remove(owner); }
+    public void cancelOrder(UUID owner) {
+        jobs.put(owner,new Job(UUID.randomUUID(),"Cancelled.")); workers.cancel(owner);
+    }
+    public int orderFromMenu(net.minecraft.server.level.ServerPlayer player,String order) {
+        try { return ask(player.createCommandSourceStack(),order); }
+        catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) { return 0; }
     }
 
     private int ask(CommandSourceStack source, String order) throws com.mojang.brigadier.exceptions.CommandSyntaxException {

@@ -48,7 +48,9 @@ public final class WorkerCommands {
             .then(Commands.literal("mine").then(Commands.argument("item", IdentifierArgument.id())
                 .then(Commands.argument("quantity", IntegerArgumentType.integer(1, 4096)).executes(ctx -> action(ctx.getSource(), (s,p) -> {
                     String item = IdentifierArgument.getId(ctx, "item").toString();
-                    return controller.get().start(p.getUUID(), new TaskPlan(item, IntegerArgumentType.getInteger(ctx, "quantity"), "base_storage"));
+                    if(OreAndOrder.instance.planning(p.getUUID())) throw new IllegalStateException("Wait for the pending order, or cancel it first.");
+                    String result=controller.get().start(p.getUUID(), new TaskPlan(item, IntegerArgumentType.getInteger(ctx, "quantity"), "base_storage"));
+                    OreAndOrder.instance.clearPlanHistory(p.getUUID()); return result;
                 })))));
         var area = Commands.literal("area");
         for (boolean first : new boolean[]{true, false}) {

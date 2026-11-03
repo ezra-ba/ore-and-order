@@ -4,7 +4,19 @@ A Minecraft **26.3 / Fabric** strategy-mod prototype. Give a worker natural-lang
 
 ## Current milestone
 
-Version **0.2.0** connects validated model plans to one owned worker per player. Supports raw iron, raw copper, raw gold, coal, diamond, emerald, redstone and lapis lazuli. Mining uses normal ore loot and tool durability. No smelting, crafting, tunnelling or combat yet: ask for **raw iron**, not iron ingots.
+Version **0.3.0** adds a right-click villager interaction panel on top of the worker mining system. Supports raw iron, raw copper, raw gold, coal, diamond, emerald, redstone and lapis lazuli. Mining uses normal ore loot and tool durability. No smelting, crafting, tunnelling or combat yet: ask for **raw iron**, not iron ingots.
+
+## Right-click villager menu
+
+Right-click an ordinary villager to choose **Trade** or **Recruit as worker**. Recruitment requires operator level 2 / singleplayer cheats, an adult villager that is not trading, and no existing worker. It replaces that villager with a worker while preserving its custom name, equipment and carried items. Normal trades remain available through the Trade button when the villager has offers.
+
+Right-click your worker to open its non-pausing action panel:
+
+- **Actions:** choose a mining resource and quantity, type a natural-language order, or cancel the current order. The status updates while the menu is open.
+- **Setup:** equip the pickaxe held in your main hand, return the tool, bind storage, or mark area corners. A storage/corner button closes the panel and displays a HUD hint. Right-click the target block to select it; sneak + right-click cancels selection. If you are still near the worker, its panel reopens afterward.
+- **Inventory:** inspect the worker's eight carried-item slots and equipped tool.
+
+Unavailable actions are disabled. Someone else's worker is read-only and its inventory is not disclosed. Server-side session, ownership, operator, distance and task-state checks also apply to action packets. Open the menu within 8 blocks; an existing session can track/cancel an owned worker up to 64 blocks away as it works. Tool transfers still require an 8-block distance. Selection expires after one minute. Commands remain available as an alternative.
 
 ## First in-game test
 
@@ -31,7 +43,7 @@ Use **JDK 25** and the included Gradle 9.6.0 wrapper:
 .\gradlew.bat build
 ```
 
-The mod JAR is `build/libs/ore-and-order-0.2.0+mc26.3.jar`. Install Fabric Loader 0.19.5+ and Fabric API for Minecraft 26.3. Replace the previous Ore & Order JAR; do not leave both versions installed. **Install on both client and server** for multiplayer, because this version adds a registered worker entity and its client renderer. In singleplayer, install in your local instance's `mods` directory.
+The mod JAR is `build/libs/ore-and-order-0.3.0+mc26.3.jar`. Install Fabric Loader 0.19.5+ and Fabric API for Minecraft 26.3. Replace the previous Ore & Order JAR; do not leave both versions installed. **Install on both client and server** for multiplayer, because the worker entity and action menu use custom networking. In singleplayer, install in your local instance's `mods` directory.
 
 ## NVIDIA configuration
 
@@ -74,6 +86,8 @@ An explicit smoke test sends one fixed order to NVIDIA using the environment key
 ```powershell
 .\gradlew.bat livePlannerTest
 ```
+
+Run `.\gradlew.bat runClientGameTest` for menu screenshots and a disposable-world test of right-clicking a villager, recruitment, and equipping a tool through the panel. The client test may download Minecraft graphics assets on first run. It does not send AI orders or consume NVIDIA quota. Screenshots are saved under `build/run/clientGameTest/screenshots`.
 
 Development client: `.\gradlew.bat runClient`. Development server: `.\gradlew.bat runServer` (review and accept Minecraft's EULA in the generated run directory if required).
 

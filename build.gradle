@@ -19,7 +19,7 @@ fabricApi {
         createSourceSet = true
         modId = 'oreandorder_test'
         enableGameTests = true
-        enableClientGameTests = false
+        enableClientGameTests = true
     }
 }
 tasks.register('integrationTest', JavaExec) {

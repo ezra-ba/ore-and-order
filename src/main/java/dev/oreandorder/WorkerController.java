@@ -83,6 +83,27 @@ public final class WorkerController {
             finish(b.owner, "Worker died. Its carried items were dropped."); b.worker = null; data.setDirty();
         }
     }
+    public WorkerEntity recruit(UUID owner, net.minecraft.world.entity.npc.villager.Villager villager) {
+        var b=binding(owner);
+        if(b.worker!=null) throw problem("You already have a worker.");
+        if(villager instanceof WorkerEntity || villager.isBaby() || !villager.isAlive() || villager.isTrading())
+            throw problem("Only an available adult villager can be recruited.");
+        WorkerEntity recruited=villager.convertTo(WorkerTypes.WORKER,ConversionParams.single(villager,true,true),EntitySpawnReason.CONVERSION,converted -> {
+            for(int slot=0;slot<villager.getInventory().getContainerSize();slot++) {
+                ItemStack stack=villager.getInventory().removeItemNoUpdate(slot);
+                if(!stack.isEmpty()) converted.getInventory().addItem(stack);
+            }
+            converted.setPersistenceRequired(); converted.setCanPickUpLoot(false); converted.setNoAi(false);
+            converted.setDropChance(EquipmentSlot.MAINHAND,1.0F);
+            if(!converted.hasCustomName()) converted.setCustomName(Component.literal("Ore & Order Worker"));
+            converted.setCustomNameVisible(true);
+        });
+        if(recruited==null) throw problem("Villager could not be recruited.");
+        b.worker=recruited.getUUID(); b.dimension=villager.level().dimension().identifier().toString();
+        b.chest=null; b.first=null; b.second=null; data.setDirty();
+        statuses.put(owner,"Idle. Equip a pickaxe and configure storage and mining area.");
+        return recruited;
+    }
     private void editable(UUID owner) { if (active.containsKey(owner)) throw problem("Cancel the current job before changing worker setup."); }
     public void storage(UUID owner, ServerLevel level, BlockPos pos) {
         editable(owner); WorkerEntity worker = worker(owner); var b = binding(owner);
@@ -129,6 +150,7 @@ public final class WorkerController {
         return statuses.get(owner);
     }
     public boolean busy(UUID owner) { return active.containsKey(owner); }
+    public String activity(UUID owner) { return statuses.getOrDefault(owner,"Idle. Ready for an order once setup is complete."); }
     public String status(UUID owner) {
         String text = statuses.getOrDefault(owner, "Idle. Saved worker/setup retained; jobs do not resume after reload.");
         var b = binding(owner);
