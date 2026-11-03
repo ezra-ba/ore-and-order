@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "oreandorder",
+  "version": "${version}",
+  "name": "Ore & Order",
+  "description": "Translate natural-language worker orders into validated plans. Command-pipeline prototype.",
+  "environment": "*",
+  "entrypoints": { "main": ["dev.oreandorder.OreAndOrder"] },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

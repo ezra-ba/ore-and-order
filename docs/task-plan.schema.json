@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ore & Order acquisition plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task", "item", "quantity", "deliver_to"],
+  "properties": {
+    "task": { "const": "acquire" },
+    "item": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$", "description": "Must also exist in the server item registry and must not be air." },
+    "quantity": { "type": "integer", "minimum": 1, "maximum": 4096 },
+    "deliver_to": { "const": "base_storage" }
+  }
+}
