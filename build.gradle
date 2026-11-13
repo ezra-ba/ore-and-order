@@ -2,6 +2,9 @@ plugins {
     id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 repositories { mavenCentral() }
+loom {
+    accessWidenerPath = file("src/main/resources/oreandorder.classtweaker")
+}
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"

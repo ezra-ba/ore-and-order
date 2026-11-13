@@ -4,7 +4,7 @@ A Minecraft **26.3 / Fabric** strategy-mod prototype. Give a worker natural-lang
 
 ## Current milestone
 
-Version **0.4.0** adds the Townhouse Ledger for recruiting a worker in survival. Workers can mine raw iron, raw copper, raw gold, coal, diamond, emerald, redstone and lapis lazuli using normal ore drops and tool durability.
+Version **0.4.1** gives the Townhouse Ledger a custom model and a recruitment menu. Workers can mine raw iron, raw copper, raw gold, coal, diamond, emerald, redstone and lapis lazuli using normal ore drops and tool durability.
 
 ## Found a Townhouse
 
@@ -12,7 +12,7 @@ Craft a **Townhouse Ledger** at a crafting table. Put a book in the center, any 
 
 Place the ledger inside the building you want to use as your Townhouse. The ledger serves as its marker, so you can build the room from any materials. Leave solid ground and two clear, dry blocks of headroom beside it.
 
-Right-click the ledger while holding **64 of one raw or cooked land-animal meat**. It consumes the stack when your worker appears beside the block. Each player can have one worker. Right-click the worker to equip a pickaxe, bind storage, mark a mining area, and give a direct order with **Mine**.
+Right-click the ledger to open its menu. Put **64 of one raw or cooked land-animal meat** in the payment slot and click **Recruit worker**. The stack is consumed when your worker appears beside the block. Closing the menu returns unused meat. Each player can have one worker. Right-click the worker to equip a pickaxe, bind storage, mark a mining area, and give a direct order with **Mine**.
 
 ## Right-click villager menu
 
@@ -51,7 +51,7 @@ Use **JDK 25** and the included Gradle 9.6.0 wrapper:
 .\gradlew.bat build
 ```
 
-The mod JAR is `build/libs/ore-and-order-0.4.0+mc26.3.jar`. Install Fabric Loader 0.19.5+ and Fabric API for Minecraft 26.3. Replace the previous Ore & Order JAR with this build. **Install on both client and server** for multiplayer. In singleplayer, install in your local instance's `mods` directory.
+The mod JAR is `build/libs/ore-and-order-0.4.1+mc26.3.jar`. Install Fabric Loader 0.19.5+ and Fabric API for Minecraft 26.3. Replace the previous Ore & Order JAR with this build. **Install on both client and server** for multiplayer. In singleplayer, install in your local instance's `mods` directory.
 
 ## NVIDIA configuration
 

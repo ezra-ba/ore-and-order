@@ -7,14 +7,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 
 public final class TownhouseGameTests {
     @GameTest(structure = "oreandorder_test:floor", maxTicks = 30)
@@ -38,30 +37,39 @@ public final class TownhouseGameTests {
         }
         var player = helper.makeMockServerPlayerInLevel();
         player.setPos(Vec3.atBottomCenterOf(ledger.south(2)));
-        var hit = new BlockHitResult(Vec3.atCenterOf(ledger), Direction.SOUTH, ledger, false);
-        var state = level.getBlockState(ledger);
+        var menu = new TownhouseMenu(1, player.getInventory(), ContainerLevelAccess.create(level, ledger), Direction.SOUTH);
+        var payment = menu.getSlot(0);
         var controller = OreAndOrder.workers;
         var binding = controller.binding(player.getUUID());
-        ItemStack meat = new ItemStack(Items.COOKED_BEEF, 64);
-        state.useItemOn(meat, level, player, InteractionHand.MAIN_HAND, hit);
-        helper.assertTrue(meat.getCount() == 64 && binding.worker == null,
+        helper.assertTrue(!payment.mayPlace(new ItemStack(Items.ROTTEN_FLESH))
+                && !payment.mayPlace(new ItemStack(Items.COBBLESTONE)), "Only suitable meat may enter the slot");
+        player.getInventory().setItem(9, new ItemStack(Items.COOKED_BEEF, 64));
+        menu.quickMoveStack(player, 1);
+        helper.assertTrue(payment.getItem().getCount() == 64 && player.getInventory().getItem(9).isEmpty(),
+                "Shift-click should move the meat into the payment slot");
+        menu.clickMenuButton(player, TownhouseMenu.RECRUIT_BUTTON);
+        helper.assertTrue(payment.getItem().getCount() == 64 && binding.worker == null,
                 "A blocked ledger must leave the meat and worker slot untouched");
         helper.setBlock(local.south(), Blocks.AIR);
-        ItemStack shortStack = new ItemStack(Items.BEEF, 63);
-        state.useItemOn(shortStack, level, player, InteractionHand.MAIN_HAND, hit);
-        helper.assertTrue(shortStack.getCount() == 63 && binding.worker == null,
+        payment.set(new ItemStack(Items.BEEF, 63));
+        menu.clickMenuButton(player, TownhouseMenu.RECRUIT_BUTTON);
+        helper.assertTrue(payment.getItem().getCount() == 63 && binding.worker == null,
                 "A partial stack must stay untouched");
-        state.useItemOn(meat, level, player, InteractionHand.MAIN_HAND, hit);
+        payment.set(new ItemStack(Items.COOKED_BEEF, 64));
+        menu.clickMenuButton(player, TownhouseMenu.RECRUIT_BUTTON);
         var worker = controller.worker(player.getUUID());
-        helper.assertTrue(meat.isEmpty() && worker.blockPosition().equals(ledger.south()),
+        helper.assertTrue(payment.getItem().isEmpty() && worker.blockPosition().equals(ledger.south()),
                 "One stack should recruit one owned worker at the clear adjacent spot");
         VillagerMenus.requireManager(player, worker);
         helper.assertTrue(!VillagerMenus.snapshot(player, worker, "").canUseAi(),
                 "Survival worker controls should not grant access to AI orders");
-        ItemStack secondPayment = new ItemStack(Items.BEEF, 64);
-        state.useItemOn(secondPayment, level, player, InteractionHand.MAIN_HAND, hit);
-        helper.assertTrue(secondPayment.getCount() == 64 && controller.worker(player.getUUID()) == worker,
+        payment.set(new ItemStack(Items.BEEF, 64));
+        menu.clickMenuButton(player, TownhouseMenu.RECRUIT_BUTTON);
+        helper.assertTrue(payment.getItem().getCount() == 64 && controller.worker(player.getUUID()) == worker,
                 "The existing worker should block duplicate recruitment without charging");
+        menu.removed(player);
+        helper.assertTrue(payment.getItem().isEmpty() && player.getInventory().countItem(Items.BEEF) == 64,
+                "Closing the ledger should return unused payment to the player");
         helper.succeed();
     }
 }

@@ -29,6 +29,7 @@ public final class OreAndOrder implements ModInitializer {
         instance=this;
         WorkerTypes.initialize();
         TownhouseBlock.initialize();
+        TownhouseMenu.initialize();
         VillagerMenus.initialize();
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             try { planner = new PlannerClient(PlannerConfig.load(FabricLoader.getInstance().getConfigDir().resolve("ore-and-order.properties"))); }

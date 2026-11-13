@@ -58,6 +58,58 @@ public final class VillagerMenuClientTest implements FabricClientGameTest {
             context.clickScreenButton("Equip held pickaxe");
             world.getServer().waitFor(server -> OreAndOrder.workers.worker(server.getPlayerList().getPlayers().getFirst().getUUID()).getMainHandItem().is(net.minecraft.world.item.Items.STONE_PICKAXE));
             context.waitTicks(3);context.takeScreenshot("worker-menu-live");
+            context.setScreen(() -> null);
+            world.getServer().runCommand("setblock 4 64 -1 oreandorder:townhouse_ledger");
+            world.getServer().runCommand("tp @a 4.5 64 1.5");
+            world.getServer().runOnServer(server -> {
+                var player = server.getPlayerList().getPlayers().getFirst();
+                player.getInventory().setItem(9, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COOKED_BEEF, 64));
+                player.inventoryMenu.broadcastChanges();
+            });
+            context.waitTicks(15);
+            context.getInput().lookAt(new net.minecraft.core.BlockPos(4, 64, -1));
+            context.waitFor(client -> client.hitResult instanceof net.minecraft.world.phys.BlockHitResult hit
+                    && hit.getBlockPos().equals(new net.minecraft.core.BlockPos(4, 64, -1)));
+            context.takeScreenshot("townhouse-ledger-block");
+            context.getInput().pressMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT);
+            context.waitForScreen(TownhouseScreen.class);
+            context.runOnClient(client -> client.gameMode.handleContainerInput(
+                    client.player.containerMenu.containerId, 1, 0, net.minecraft.world.inventory.ContainerInput.QUICK_MOVE,
+                    client.player));
+            context.waitFor(client -> ((TownhouseScreen) client.gui.screen()).getMenu().hasPayment());
+            context.waitTicks(3);
+            context.takeScreenshot("townhouse-ledger-payment");
+            context.runOnClient(client -> client.gui.screen().onClose());
+            world.getServer().waitFor(server -> {
+                var player = server.getPlayerList().getPlayers().getFirst();
+                return player.containerMenu == player.inventoryMenu
+                        && player.getInventory().countItem(net.minecraft.world.item.Items.COOKED_BEEF) == 64;
+            });
+            world.getServer().runOnServer(server -> {
+                var player = server.getPlayerList().getPlayers().getFirst();
+                var controller = OreAndOrder.workers;
+                var oldWorker = controller.worker(player.getUUID());
+                controller.died(oldWorker);
+                oldWorker.discard();
+                player.getInventory().clearContent();
+                player.getInventory().setItem(9, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COOKED_BEEF, 64));
+                player.inventoryMenu.broadcastChanges();
+            });
+            context.waitTicks(3);
+            context.getInput().pressMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT);
+            context.waitForScreen(TownhouseScreen.class);
+            context.runOnClient(client -> client.gameMode.handleContainerInput(
+                    client.player.containerMenu.containerId, 1, 0, net.minecraft.world.inventory.ContainerInput.QUICK_MOVE,
+                    client.player));
+            context.waitFor(client -> ((TownhouseScreen) client.gui.screen()).getMenu().hasPayment());
+            context.waitTicks(3);
+            context.clickScreenButton("Recruit worker");
+            world.getServer().waitFor(server -> {
+                var player = server.getPlayerList().getPlayers().getFirst();
+                var binding = OreAndOrder.workers.binding(player.getUUID());
+                return binding.worker != null && binding.townhouseWorker
+                        && player.containerMenu.getSlot(0).getItem().isEmpty();
+            });
         }
     }
 }
