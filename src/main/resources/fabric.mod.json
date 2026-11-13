@@ -5,6 +5,7 @@
   "name": "Ore & Order",
   "description": "Command a worker to mine exposed ore and deliver its drops to your storage.",
   "environment": "*",
+  "accessWidener": "oreandorder.classtweaker",
   "entrypoints": { "main": ["dev.oreandorder.OreAndOrder"], "client": ["dev.oreandorder.OreAndOrderClient"] },
   "depends": {
     "fabricloader": ">=0.19.5",

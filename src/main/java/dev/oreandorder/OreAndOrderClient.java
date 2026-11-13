@@ -12,10 +12,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 
 public final class OreAndOrderClient implements ClientModInitializer {
     private static String selection="";
     @Override public void onInitializeClient() {
+        MenuScreens.register(TownhouseMenu.TYPE, TownhouseScreen::new);
         EntityRendererRegistry.register(WorkerTypes.WORKER, VillagerRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(VillagerPackets.Snapshot.TYPE,(packet,context) -> {
             var state=new Gson().fromJson(packet.json(),VillagerMenuState.class);

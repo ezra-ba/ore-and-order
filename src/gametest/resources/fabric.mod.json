@@ -5,7 +5,7 @@
   "name": "Ore & Order server tests",
   "environment": "*",
   "entrypoints": {
-    "fabric-gametest": ["dev.oreandorder.WorkerGameTests", "dev.oreandorder.VillagerMenuGameTests"],
+    "fabric-gametest": ["dev.oreandorder.WorkerGameTests", "dev.oreandorder.VillagerMenuGameTests", "dev.oreandorder.TownhouseGameTests"],
     "fabric-client-gametest": ["dev.oreandorder.VillagerMenuClientTest"]
   }
 }

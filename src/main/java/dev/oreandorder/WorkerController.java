@@ -70,13 +70,37 @@ public final class WorkerController {
         WorkerEntity worker = WorkerTypes.WORKER.create(level, EntitySpawnReason.COMMAND);
         if (worker == null) throw problem("Could not create worker.");
         worker.setPos(pos.getX() + .5, pos.getY(), pos.getZ() + .5);
+        if (!level.noCollision(worker) || !level.isUnobstructed(worker))
+            throw problem("The worker's spawn space is occupied.");
         worker.setCustomName(Component.literal("Ore & Order Worker")); worker.setCustomNameVisible(true);
         worker.setDropChance(EquipmentSlot.MAINHAND, 1.0F);
         if (!level.addFreshEntity(worker)) throw problem("Could not spawn worker.");
         b.worker = worker.getUUID(); b.dimension = level.dimension().identifier().toString();
+        b.townhouseWorker = false;
         b.chest = null; b.first = null; b.second = null;
         data.setDirty(); statuses.put(owner, "Idle. Bind storage, mark an area, and equip a pickaxe.");
         return worker;
+    }
+    public void spawnAtTownhouse(UUID owner, ServerLevel level, BlockPos ledger, Direction clickedFace) {
+        var binding = binding(owner);
+        if (binding.worker != null) throw problem("You already have a worker.");
+        List<Direction> exits = new ArrayList<>();
+        if (clickedFace.getAxis().isHorizontal()) exits.add(clickedFace);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            if (direction != clickedFace) exits.add(direction);
+        }
+        for (Direction direction : exits) {
+            BlockPos pos = ledger.relative(direction);
+            if (!safeStand(level, pos)) continue;
+            AABB bounds = WorkerTypes.WORKER.getSpawnAABB(Vec3.atBottomCenterOf(pos));
+            if (!level.noCollision(bounds) || !level.isUnobstructed(null,
+                    net.minecraft.world.phys.shapes.Shapes.create(bounds))) continue;
+            spawn(owner, level, pos);
+            binding.townhouseWorker = true;
+            data.setDirty();
+            return;
+        }
+        throw problem("Leave clear space beside the ledger: solid ground and two dry blocks of headroom.");
     }
     public void died(WorkerEntity worker) {
         for (var b : data.bindings.values()) if (worker.getUUID().equals(b.worker)) {
@@ -100,6 +124,7 @@ public final class WorkerController {
         });
         if(recruited==null) throw problem("Villager could not be recruited.");
         b.worker=recruited.getUUID(); b.dimension=villager.level().dimension().identifier().toString();
+        b.townhouseWorker = false;
         b.chest=null; b.first=null; b.second=null; data.setDirty();
         statuses.put(owner,"Idle. Equip a pickaxe and configure storage and mining area.");
         return recruited;

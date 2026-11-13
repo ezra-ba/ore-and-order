@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["PCP", "CBC", "PCP"],
+  "key": {
+    "P": "#minecraft:planks",
+    "C": "minecraft:cobblestone",
+    "B": "minecraft:book"
+  },
+  "result": { "id": "oreandorder:townhouse_ledger" }
+}
