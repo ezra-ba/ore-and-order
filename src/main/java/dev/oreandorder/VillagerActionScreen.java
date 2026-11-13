@@ -24,7 +24,7 @@ public final class VillagerActionScreen extends Screen {
 
     public VillagerActionScreen(VillagerMenuState state) { super(Component.literal("Ore & Order · Villager")); this.state=state; }
     public void update(VillagerMenuState next) {
-        boolean rebuild=state.worker()!=next.worker() || state.canManage()!=next.canManage() || state.canRecruit()!=next.canRecruit() || state.canTrade()!=next.canTrade();
+        boolean rebuild=state.worker()!=next.worker() || state.canManage()!=next.canManage() || state.canRecruit()!=next.canRecruit() || state.canTrade()!=next.canTrade() || state.canUseAi()!=next.canUseAi();
         state=next; localNotice="";
         if(rebuild) { tab=0; rebuildWidgets(); }
     }
@@ -64,7 +64,9 @@ public final class VillagerActionScreen extends Screen {
                 if(order.isBlank()) {localNotice="Type an order first.";return;}
                 request(Action.ORDER,order);
             });
-            send.setTooltip(Tooltip.create(Component.literal("Send this instruction to the server's configured model.")));
+            send.setTooltip(Tooltip.create(Component.literal(state.canUseAi()
+                    ? "Send this instruction to the server's configured model."
+                    : "AI orders require operator permissions. Use Mine for direct orders.")));
             stop=button("Cancel order",x,y+52,112,() -> request(Action.CANCEL,""));
         } else if(tab==1) {
             mutationButtons.add(button("Equip held pickaxe",x,y,(w-6)/2,() -> request(Action.EQUIP,"")));
@@ -84,7 +86,7 @@ public final class VillagerActionScreen extends Screen {
     private void updateButtons() {
         for(Button button:mutationButtons) button.active=state.canManage() && !state.busy();
         if(mine!=null) mine.active=state.canManage() && !state.busy() && state.ready();
-        if(send!=null) send.active=state.canManage() && !state.busy() && state.ready();
+        if(send!=null) send.active=state.canUseAi() && !state.busy() && state.ready();
         if(stop!=null) stop.active=state.canManage() && state.busy();
     }
     private void request(Action action,String value) {

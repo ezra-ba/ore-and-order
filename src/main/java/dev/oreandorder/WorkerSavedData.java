@@ -13,6 +13,7 @@ public final class WorkerSavedData extends SavedData {
     public static final class Binding {
         public UUID owner, worker;
         public String dimension;
+        public boolean townhouseWorker;
         public Long chest, first, second;
         Binding(UUID owner) { this.owner = owner; }
     }

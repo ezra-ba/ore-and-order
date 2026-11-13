@@ -4,7 +4,15 @@ A Minecraft **26.3 / Fabric** strategy-mod prototype. Give a worker natural-lang
 
 ## Current milestone
 
-Version **0.3.0** adds a right-click villager interaction panel on top of the worker mining system. Supports raw iron, raw copper, raw gold, coal, diamond, emerald, redstone and lapis lazuli. Mining uses normal ore loot and tool durability. No smelting, crafting, tunnelling or combat yet: ask for **raw iron**, not iron ingots.
+Version **0.4.0** adds the Townhouse Ledger for recruiting a worker in survival. Workers can mine raw iron, raw copper, raw gold, coal, diamond, emerald, redstone and lapis lazuli using normal ore drops and tool durability.
+
+## Found a Townhouse
+
+Craft a **Townhouse Ledger** at a crafting table. Put a book in the center, any planks in the four corners, and cobblestone in the other four slots.
+
+Place the ledger inside the building you want to use as your Townhouse. The ledger serves as its marker, so you can build the room from any materials. Leave solid ground and two clear, dry blocks of headroom beside it.
+
+Right-click the ledger while holding **64 of one raw or cooked land-animal meat**. It consumes the stack when your worker appears beside the block. Each player can have one worker. Right-click the worker to equip a pickaxe, bind storage, mark a mining area, and give a direct order with **Mine**.
 
 ## Right-click villager menu
 
@@ -16,7 +24,7 @@ Right-click your worker to open its non-pausing action panel:
 - **Setup:** equip the pickaxe held in your main hand, return the tool, bind storage, or mark area corners. A storage/corner button closes the panel and displays a HUD hint. Right-click the target block to select it; sneak + right-click cancels selection. If you are still near the worker, its panel reopens afterward.
 - **Inventory:** inspect the worker's eight carried-item slots and equipped tool.
 
-Unavailable actions are disabled. Someone else's worker is read-only and its inventory is not disclosed. Server-side session, ownership, operator, distance and task-state checks also apply to action packets. Open the menu within 8 blocks; an existing session can track/cancel an owned worker up to 64 blocks away as it works. Tool transfers still require an 8-block distance. Selection expires after one minute. Commands remain available as an alternative.
+Owners can manage workers recruited through the Townhouse Ledger in survival. AI orders, recruiting ordinary villagers, and controlling workers created by the operator command still require operator permissions. The server checks ownership, distance, and the current job before applying changes. Open the menu within 8 blocks. An existing session can track or cancel an owned worker up to 64 blocks away. Tool transfers require an 8-block distance. Block selection expires after one minute.
 
 ## First in-game test
 
@@ -43,7 +51,7 @@ Use **JDK 25** and the included Gradle 9.6.0 wrapper:
 .\gradlew.bat build
 ```
 
-The mod JAR is `build/libs/ore-and-order-0.3.0+mc26.3.jar`. Install Fabric Loader 0.19.5+ and Fabric API for Minecraft 26.3. Replace the previous Ore & Order JAR; do not leave both versions installed. **Install on both client and server** for multiplayer, because the worker entity and action menu use custom networking. In singleplayer, install in your local instance's `mods` directory.
+The mod JAR is `build/libs/ore-and-order-0.4.0+mc26.3.jar`. Install Fabric Loader 0.19.5+ and Fabric API for Minecraft 26.3. Replace the previous Ore & Order JAR with this build. **Install on both client and server** for multiplayer. In singleplayer, install in your local instance's `mods` directory.
 
 ## NVIDIA configuration
 

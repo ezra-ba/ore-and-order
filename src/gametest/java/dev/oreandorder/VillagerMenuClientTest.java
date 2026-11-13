@@ -13,7 +13,7 @@ public final class VillagerMenuClientTest implements FabricClientGameTest {
         slots.add(new VillagerMenuState.Stack("minecraft:coal","Coal",8));
         while(slots.size()<8) slots.add(new VillagerMenuState.Stack("minecraft:air","Empty",0));
         var worker=new VillagerMenuState(UUID.randomUUID(),"Ada · Mining worker",true,true,true,false,false,false,true,
-            "Idle. Ready for a mining order.","","124, 64, -32","128, 64, -32 → 136, 66, -28","Stone Pickaxe",slots);
+            "Idle. Ready for a mining order.","","124, 64, -32","128, 64, -32 → 136, 66, -28","Stone Pickaxe",slots,true);
         context.setScreen(() -> new VillagerActionScreen(worker));
         context.waitTicks(5); context.takeScreenshot("worker-actions");
         context.clickScreenButton("Setup"); context.waitTicks(2); context.takeScreenshot("worker-setup");
@@ -26,7 +26,7 @@ public final class VillagerMenuClientTest implements FabricClientGameTest {
             }
         });
         var villagerPreview=new VillagerMenuState(UUID.randomUUID(),"Villager",false,false,false,true,true,false,false,
-            "Trade here, or recruit this villager as your worker.","","Not set","Not set","No pickaxe",List.of());
+            "Trade here, or recruit this villager as your worker.","","Not set","Not set","No pickaxe",List.of(),false);
         context.setScreen(() -> new VillagerActionScreen(villagerPreview));
         context.waitTicks(3); context.takeScreenshot("villager-actions");
         context.setScreen(() -> null);

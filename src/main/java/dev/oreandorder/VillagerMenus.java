@@ -69,14 +69,18 @@ public final class VillagerMenus {
     }
     static void requireManager(ServerPlayer player,Villager villager) {
         if (!within(player,villager,64)) throw problem("Worker is too far away. Return to it to open the menu.");
-        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) throw problem("Worker actions require operator level 2 or cheats enabled.");
         if (!(villager instanceof WorkerEntity) || !owns(player.getUUID(),villager)) throw problem("This worker belongs to another player.");
+        if (!canManageOwnWorker(player)) throw problem("Worker actions require operator permissions or a worker recruited at a Townhouse Ledger.");
+    }
+    private static boolean canManageOwnWorker(ServerPlayer player) {
+        return player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)
+                || OreAndOrder.workers.binding(player.getUUID()).townhouseWorker;
     }
     static VillagerMenuState snapshot(ServerPlayer player,Villager villager,String notice) {
         var workers=OreAndOrder.workers; UUID owner=player.getUUID(); boolean worker=villager instanceof WorkerEntity;
         boolean own=worker && owns(owner,villager);
         boolean permission=player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
-        boolean manage=own && permission;
+        boolean manage=own && canManageOwnWorker(player);
         boolean busy=own && (workers.busy(owner) || OreAndOrder.instance.planning(owner));
         var binding=workers.binding(owner);
         List<VillagerMenuState.Stack> inventory=new ArrayList<>();
@@ -86,14 +90,14 @@ public final class VillagerMenus {
         }
         String status=worker ? (own ? OreAndOrder.instance.activityForMenu(owner) : "This worker belongs to another player.")
             : (villager.isBaby()?"This villager is too young to work or trade.":"Trade here, or recruit this villager as your worker.");
-        if (worker && own && !permission) status="Worker controls require operator level 2 or cheats enabled.";
+        if (own && !manage) status="This worker requires operator permissions to control.";
         String storage=own && binding.chest!=null ? BlockPos.of(binding.chest).toShortString():"Not set";
         String area=own && binding.first!=null && binding.second!=null ? BlockPos.of(binding.first).toShortString()+" → "+BlockPos.of(binding.second).toShortString():"Not set";
         boolean ready=own && binding.chest!=null && binding.first!=null && binding.second!=null && !villager.getMainHandItem().isEmpty();
         return new VillagerMenuState(villager.getUUID(),villager.getName().getString(),worker,own,manage,
             !worker && permission && !villager.isBaby() && !villager.isTrading() && binding.worker==null,
             !worker && !villager.isBaby() && !villager.isTrading() && !villager.getOffers().isEmpty(),busy,ready,status,notice,storage,area,
-            own && !villager.getMainHandItem().isEmpty()?villager.getMainHandItem().getHoverName().getString():"No pickaxe",inventory);
+            own && !villager.getMainHandItem().isEmpty()?villager.getMainHandItem().getHoverName().getString():"No pickaxe",inventory,manage && permission);
     }
     private static void send(ServerPlayer player,Villager villager,String notice) {
         send(player,villager,notice,false);
@@ -142,7 +146,11 @@ public final class VillagerMenus {
                 case EQUIP -> { workers.equip(owner,player); session.notice="Pickaxe equipped from your main hand."; }
                 case UNEQUIP -> { workers.unequip(owner,player); session.notice="Tool returned to you."; }
                 case CANCEL -> { OreAndOrder.instance.cancelOrder(owner); session.notice="Order cancelled. Carried items are retained."; }
-                case ORDER -> { session.notice=OreAndOrder.instance.orderFromMenu(player,packet.value())==1?"Order submitted. Check the live status above.":"Order could not start. See chat for details."; }
+                case ORDER -> {
+                    if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
+                        throw problem("AI orders require operator permissions. Use Mine for direct orders.");
+                    session.notice=OreAndOrder.instance.orderFromMenu(player,packet.value())==1?"Order submitted. Check the live status above.":"Order could not start. See chat for details.";
+                }
                 case MINE -> {
                     String[] values=packet.value().split("\\|",-1);
                     if(values.length!=2) throw problem("Choose a resource and quantity.");
@@ -167,7 +175,7 @@ public final class VillagerMenus {
         try {
             villager=resolve(player,session.entity);
             if(session.expires<player.level().getServer().getTickCount() || player.isSpectator()
-                || !player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !owns(player.getUUID(),villager)) throw problem("Selection expired or permission was lost.");
+                || !owns(player.getUUID(),villager) || !canManageOwnWorker(player)) throw problem("Selection expired or permission was lost.");
             if(!player.level().hasChunkAt(pos) || player.position().distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos))>49) throw problem("Choose a block within 6 blocks.");
             if(player.isShiftKeyDown()) session.notice="Selection cancelled.";
             else if(session.selection==Action.SELECT_STORAGE) { OreAndOrder.workers.storage(player.getUUID(),player.level(),pos); session.notice="Storage bound."; }
